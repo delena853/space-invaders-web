@@ -1,5 +1,5 @@
 name: Build and deploy Pygbag
-
+run: python -m pygbag --build --disable-sound-format-error .
 on:
   workflow_dispatch:
   push:
