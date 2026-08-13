@@ -601,9 +601,9 @@ async def main():
                 enemy_bullets.remove(enemy_bullet)
                 lives -= 1
             
-                if lives<0:
-                    lives=0
-                    game_over=True
+                if lives <= 0:
+                    lives = 0
+                    game_over = True
                     if score > best_score:
                         best_score = score
                     
@@ -827,4 +827,5 @@ async def main():
         clock.tick(60)
         await asyncio.sleep(0)
 
+asyncio.run(main())
 asyncio.run(main())
