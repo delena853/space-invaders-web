@@ -12,8 +12,8 @@ game_over_sound=pygame.mixer.Sound("game_over.ogg")
 # FENÊTRE
 # ==========================================
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 900
+HEIGHT = 700
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders")
@@ -36,7 +36,7 @@ print("Taille background :", background.get_size())
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 player_img = pygame.image.load("player.png").convert_alpha()
-player_img = pygame.transform.scale(player_img, (70, 55))
+player_img = pygame.transform.scale(player_img, (80, 63))
 
 alien_img = pygame.image.load("alien.png").convert_alpha()
 alien_img = pygame.transform.scale(alien_img, (55, 45))
@@ -84,15 +84,15 @@ button_font = pygame.font.SysFont("Arial", 24)
 # JOUEUR
 # ==========================================
 
-player = pygame.Rect(WIDTH // 2 - 35, HEIGHT - 80, 70, 55)
+player = pygame.Rect(WIDTH // 2 - 40, HEIGHT - 95, 80, 63)
 player_speed = 6
 
 # ==========================================
 # BOUTONS TACTILES (VERSION MOBILE)
 # ==========================================
-left_button = pygame.Rect(20, 525, 70, 55)
-right_button = pygame.Rect(100, 525, 70, 55)
-fire_button = pygame.Rect(WIDTH - 90, 525, 70, 55)
+left_button = pygame.Rect(25, HEIGHT - 85, 90, 65)
+right_button = pygame.Rect(130, HEIGHT - 85, 90, 65)
+fire_button = pygame.Rect(WIDTH - 125, HEIGHT - 85, 100, 65)
 restart_button = pygame.Rect(WIDTH // 2 - 90, HEIGHT // 2 + 35, 180, 55)
 
 touches = {}
@@ -100,9 +100,9 @@ last_mobile_shot = 0
 
 # bouclier
 shields=[
-    {"rect": pygame.Rect(120, 440, 90, 60),"life":3},
-    {"rect": pygame.Rect(355, 440, 90, 60),"life":3},
-    {"rect": pygame.Rect(590, 440, 90, 60),"life":3}
+    {"rect": pygame.Rect(150, HEIGHT - 190, 90, 60),"life":3},
+    {"rect": pygame.Rect(WIDTH // 2 - 45, HEIGHT - 190, 90, 60),"life":3},
+    {"rect": pygame.Rect(WIDTH - 240, HEIGHT - 190, 90, 60),"life":3}
 ]
 # ==========================================
 # BALLES
@@ -256,13 +256,13 @@ async def main():
                     rapid_shoot_timer = 0
 
                     shields = [
-                        {"rect": pygame.Rect(120, 440, 90, 60), "life": 3},
-                        {"rect": pygame.Rect(355, 440, 90, 60), "life": 3},
-                        {"rect": pygame.Rect(590, 440, 90, 60), "life": 3}
+                        {"rect": pygame.Rect(150, HEIGHT - 190, 90, 60), "life": 3},
+                        {"rect": pygame.Rect(WIDTH // 2 - 45, HEIGHT - 190, 90, 60), "life": 3},
+                        {"rect": pygame.Rect(WIDTH - 240, HEIGHT - 190, 90, 60), "life": 3}
                     ]
 
-                    player.x = WIDTH // 2 - 35
-                    player.y = HEIGHT - 80
+                    player.x = WIDTH // 2 - 40
+                    player.y = HEIGHT - 95
 
                     bullets.clear()
                     enemy_bullets.clear()
@@ -827,5 +827,4 @@ async def main():
         clock.tick(60)
         await asyncio.sleep(0)
 
-asyncio.run(main())
 asyncio.run(main())
