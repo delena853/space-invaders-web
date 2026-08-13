@@ -4,9 +4,9 @@ import asyncio
 
 pygame.init()
 pygame.mixer.init()
-tir_sound=pygame.mixer.Sound("tir.wav")
-explosion_sound=pygame.mixer.Sound("explosion.wav")
-game_over_sound=pygame.mixer.Sound("game_over.wav")
+tir_sound=pygame.mixer.Sound("tir.ogg")
+explosion_sound=pygame.mixer.Sound("explosion.ogg")
+game_over_sound=pygame.mixer.Sound("game_over.ogg")
 
 # ==========================================
 # FENÊTRE
@@ -93,6 +93,7 @@ player_speed = 6
 left_button = pygame.Rect(20, 525, 70, 55)
 right_button = pygame.Rect(100, 525, 70, 55)
 fire_button = pygame.Rect(WIDTH - 90, 525, 70, 55)
+restart_button = pygame.Rect(WIDTH // 2 - 90, HEIGHT // 2 + 35, 180, 55)
 
 touches = {}
 last_mobile_shot = 0
@@ -195,17 +196,25 @@ async def main():
                 )
             )
 
-            new_game_text = font.render(
-                "ENTREE = Nouvelle partie",
-                True,
-                WHITE
-            )
+            # Bouton REJOUER pour téléphone
+            pygame.draw.rect(screen, (40, 40, 90), restart_button, border_radius=12)
+            pygame.draw.rect(screen, WHITE, restart_button, 2, border_radius=12)
 
+            new_game_text = font.render("REJOUER", True, WHITE)
             screen.blit(
                 new_game_text,
                 (
-                    WIDTH // 2 - new_game_text.get_width() // 2,
-                    HEIGHT // 2 + 40
+                    restart_button.centerx - new_game_text.get_width() // 2,
+                    restart_button.centery - new_game_text.get_height() // 2
+                )
+            )
+
+            keyboard_text = button_font.render("ou ENTREE sur ordinateur", True, WHITE)
+            screen.blit(
+                keyboard_text,
+                (
+                    WIDTH // 2 - keyboard_text.get_width() // 2,
+                    restart_button.bottom + 10
                 )
             )
 
@@ -215,33 +224,72 @@ async def main():
 
                 if event.type == pygame.QUIT:
                     running = False
-    
-                if event.type == pygame.KEYDOWN:
 
-                    if event.key == pygame.K_RETURN:
+                restart_game = False
 
-                        score = 0
-                        lives = 3
-                        game_over = False
-                    
-                        shields=[
-                            {"rect": pygame.Rect(120, 440, 90, 60), "life": 3},
-                            {"rect": pygame.Rect(355, 440, 90, 60), "life": 3},
-                            {"rect": pygame.Rect(590, 440, 90, 60), "life": 3}
-                        ] 
+                # Clavier
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    restart_game = True
 
-                        player.x = WIDTH // 2 - 25
-                        player.y = HEIGHT - 60
+                # Souris
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1 and restart_button.collidepoint(event.pos):
+                        restart_game = True
 
-                        bullets.clear()
-                        enemy_bullets.clear()
+                # Tactile
+                if event.type == pygame.FINGERDOWN:
+                    finger_pos = (int(event.x * WIDTH), int(event.y * HEIGHT))
+                    if restart_button.collidepoint(finger_pos):
+                        restart_game = True
 
-                        for enemy in enemies:
-                       
-                         if enemy["rect"].top>HEIGHT:
-                           
-                               enemy["rect"].x=random.randint(40, WIDTH-80)
-                               enemy["rect"].y=random.randint(-300, -50)
+                if restart_game:
+                    score = 0
+                    lives = 3
+                    game_over = False
+                    level = 1
+                    enemy_speed = 2
+
+                    rapid_fire = False
+                    double_laser = False
+                    rapid_timer = 0
+                    double_timer = 0
+                    rapid_shoot_timer = 0
+
+                    shields = [
+                        {"rect": pygame.Rect(120, 440, 90, 60), "life": 3},
+                        {"rect": pygame.Rect(355, 440, 90, 60), "life": 3},
+                        {"rect": pygame.Rect(590, 440, 90, 60), "life": 3}
+                    ]
+
+                    player.x = WIDTH // 2 - 35
+                    player.y = HEIGHT - 80
+
+                    bullets.clear()
+                    enemy_bullets.clear()
+                    bonuses.clear()
+                    explosions.clear()
+                    touches.clear()
+
+                    enemies.clear()
+
+                    for i in range(8):
+                        enemy_type = random.randint(1, 3)
+
+                        enemy = {
+                            "rect": pygame.Rect(
+                                random.randint(40, WIDTH - 80),
+                                random.randint(-300, -50),
+                                55,
+                                45
+                            ),
+                            "type": enemy_type,
+                            "life": 1
+                        }
+
+                        if enemy_type == 3:
+                            enemy["life"] = 2
+
+                        enemies.append(enemy)
 
             clock.tick(60)
             await asyncio.sleep(0)
