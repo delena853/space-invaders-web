@@ -4,9 +4,9 @@ import asyncio
 
 pygame.init()
 pygame.mixer.init()
-tir_sound=pygame.mixer.Sound("tir.wav")
-explosion_sound=pygame.mixer.Sound("explosion.wav")
-game_over_sound=pygame.mixer.Sound("game_over.wav")
+tir_sound=pygame.mixer.Sound("tir.ogg")
+explosion_sound=pygame.mixer.Sound("explosion.ogg")
+game_over_sound=pygame.mixer.Sound("game_over.ogg")
 
 # ==========================================
 # FENÊTRE
