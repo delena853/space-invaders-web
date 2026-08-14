@@ -1,6 +1,7 @@
 import pygame
 import random
 import asyncio
+import platform
 
 pygame.init()
 pygame.mixer.init()
@@ -12,8 +13,8 @@ game_over_sound=pygame.mixer.Sound("game_over.ogg")
 # FENÊTRE
 # ==========================================
 
-WIDTH = 900
-HEIGHT = 700
+WIDTH = 960
+HEIGHT = 540
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders")
@@ -36,7 +37,7 @@ print("Taille background :", background.get_size())
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 player_img = pygame.image.load("player.png").convert_alpha()
-player_img = pygame.transform.scale(player_img, (80, 63))
+player_img = pygame.transform.scale(player_img, (70, 55))
 
 alien_img = pygame.image.load("alien.png").convert_alpha()
 alien_img = pygame.transform.scale(alien_img, (55, 45))
@@ -84,25 +85,26 @@ button_font = pygame.font.SysFont("Arial", 24)
 # JOUEUR
 # ==========================================
 
-player = pygame.Rect(WIDTH // 2 - 40, HEIGHT - 95, 80, 63)
+player = pygame.Rect(WIDTH // 2 - 35, HEIGHT - 78, 70, 55)
 player_speed = 6
 
 # ==========================================
 # BOUTONS TACTILES (VERSION MOBILE)
 # ==========================================
-left_button = pygame.Rect(25, HEIGHT - 85, 90, 65)
-right_button = pygame.Rect(130, HEIGHT - 85, 90, 65)
-fire_button = pygame.Rect(WIDTH - 125, HEIGHT - 85, 100, 65)
+left_button = pygame.Rect(20, HEIGHT - 70, 80, 55)
+right_button = pygame.Rect(115, HEIGHT - 70, 80, 55)
+fire_button = pygame.Rect(WIDTH - 115, HEIGHT - 70, 95, 55)
 restart_button = pygame.Rect(WIDTH // 2 - 90, HEIGHT // 2 + 35, 180, 55)
+fullscreen_button = pygame.Rect(WIDTH - 190, 10, 170, 42)
 
 touches = {}
 last_mobile_shot = 0
 
 # bouclier
 shields=[
-    {"rect": pygame.Rect(150, HEIGHT - 190, 90, 60),"life":3},
-    {"rect": pygame.Rect(WIDTH // 2 - 45, HEIGHT - 190, 90, 60),"life":3},
-    {"rect": pygame.Rect(WIDTH - 240, HEIGHT - 190, 90, 60),"life":3}
+    {"rect": pygame.Rect(180, HEIGHT - 155, 90, 60),"life":3},
+    {"rect": pygame.Rect(WIDTH // 2 - 45, HEIGHT - 155, 90, 60),"life":3},
+    {"rect": pygame.Rect(WIDTH - 270, HEIGHT - 155, 90, 60),"life":3}
 ]
 # ==========================================
 # BALLES
@@ -164,6 +166,18 @@ rapid_shoot_timer=0
 # ==========================================
 
 running = True
+
+def demander_plein_ecran():
+    try:
+        if hasattr(platform, "window"):
+            document = platform.window.document
+            if hasattr(document.documentElement, "requestFullscreen"):
+                document.documentElement.requestFullscreen()
+            elif hasattr(document.documentElement, "webkitRequestFullscreen"):
+                document.documentElement.webkitRequestFullscreen()
+    except Exception:
+        pass
+
 
 async def main():
     global running, game_over, score, lives, shields, level, enemy_speed
@@ -256,13 +270,13 @@ async def main():
                     rapid_shoot_timer = 0
 
                     shields = [
-                        {"rect": pygame.Rect(150, HEIGHT - 190, 90, 60), "life": 3},
-                        {"rect": pygame.Rect(WIDTH // 2 - 45, HEIGHT - 190, 90, 60), "life": 3},
-                        {"rect": pygame.Rect(WIDTH - 240, HEIGHT - 190, 90, 60), "life": 3}
+                        {"rect": pygame.Rect(180, HEIGHT - 155, 90, 60), "life": 3},
+                        {"rect": pygame.Rect(WIDTH // 2 - 45, HEIGHT - 155, 90, 60), "life": 3},
+                        {"rect": pygame.Rect(WIDTH - 270, HEIGHT - 155, 90, 60), "life": 3}
                     ]
 
-                    player.x = WIDTH // 2 - 40
-                    player.y = HEIGHT - 95
+                    player.x = WIDTH // 2 - 35
+                    player.y = HEIGHT - 78
 
                     bullets.clear()
                     enemy_bullets.clear()
@@ -346,6 +360,9 @@ async def main():
             # COMMANDES TACTILES / SOURIS
             # --------------------------------------
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 and fullscreen_button.collidepoint(event.pos):
+                    demander_plein_ecran()
+
                 if event.button == 1 and fire_button.collidepoint(event.pos):
                     now = pygame.time.get_ticks()
                     if now - last_mobile_shot > 120:
@@ -382,6 +399,9 @@ async def main():
             if event.type == pygame.FINGERDOWN:
                 finger_pos = (int(event.x * WIDTH), int(event.y * HEIGHT))
                 touches[event.finger_id] = finger_pos
+
+                if fullscreen_button.collidepoint(finger_pos):
+                    demander_plein_ecran()
 
                 if fire_button.collidepoint(finger_pos):
                     now = pygame.time.get_ticks()
@@ -601,9 +621,9 @@ async def main():
                 enemy_bullets.remove(enemy_bullet)
                 lives -= 1
             
-                if lives <= 0:
-                    lives = 0
-                    game_over = True
+                if lives<0:
+                    lives=0
+                    game_over=True
                     if score > best_score:
                         best_score = score
                     
@@ -753,11 +773,11 @@ async def main():
             (255,255,255)
         )
     
-        screen.blit(best_text, (10, 50)) 
+        screen.blit(best_text, (10, 45)) 
         texte_vies=font.render(f"Vies:{lives}", True, WHITE)
-        screen.blit(texte_vies, (10, 90))
+        screen.blit(texte_vies, (10, 80))
         niveau_text=font.render(f"Niveau : {level}", True, WHITE)
-        screen.blit(niveau_text, (10, 130))
+        screen.blit(niveau_text, (10, 115))
         for shield in shields:
             if shield["life"]==3:
                 screen.blit(shield_img, shield["rect"])
@@ -783,6 +803,21 @@ async def main():
                     bonus["rect"].center,
                     15
                 )
+        # ==========================================
+        # BOUTON PLEIN ECRAN
+        # ==========================================
+        pygame.draw.rect(screen, (25, 60, 90), fullscreen_button, border_radius=10)
+        pygame.draw.rect(screen, WHITE, fullscreen_button, 2, border_radius=10)
+
+        fullscreen_text = button_font.render("PLEIN ECRAN", True, WHITE)
+        screen.blit(
+            fullscreen_text,
+            (
+                fullscreen_button.centerx - fullscreen_text.get_width() // 2,
+                fullscreen_button.centery - fullscreen_text.get_height() // 2
+            )
+        )
+
         # ==========================================
         # AFFICHAGE DES BOUTONS TACTILES
         # ==========================================
