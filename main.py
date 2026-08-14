@@ -1,6 +1,7 @@
 import pygame
 import random
 import asyncio
+import sys
 import platform
 
 pygame.init()
@@ -18,6 +19,34 @@ HEIGHT = 540
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders")
+
+# Sur le web, le canvas remplit automatiquement au maximum l'écran disponible.
+# Le jeu garde son format 16:9 sans être déformé.
+if sys.platform == "emscripten":
+    try:
+        canvas = platform.window.canvas
+        canvas.style.width = "100vw"
+        canvas.style.height = "100vh"
+        canvas.style.maxWidth = "100vw"
+        canvas.style.maxHeight = "100vh"
+        canvas.style.objectFit = "contain"
+        canvas.style.display = "block"
+
+        document = platform.window.document
+        document.documentElement.style.margin = "0"
+        document.documentElement.style.padding = "0"
+        document.documentElement.style.width = "100%"
+        document.documentElement.style.height = "100%"
+        document.documentElement.style.overflow = "hidden"
+
+        document.body.style.margin = "0"
+        document.body.style.padding = "0"
+        document.body.style.width = "100%"
+        document.body.style.height = "100%"
+        document.body.style.overflow = "hidden"
+        document.body.style.background = "black"
+    except Exception:
+        pass
 
 clock = pygame.time.Clock()
 
@@ -91,11 +120,10 @@ player_speed = 6
 # ==========================================
 # BOUTONS TACTILES (VERSION MOBILE)
 # ==========================================
-left_button = pygame.Rect(20, HEIGHT - 70, 80, 55)
-right_button = pygame.Rect(115, HEIGHT - 70, 80, 55)
-fire_button = pygame.Rect(WIDTH - 115, HEIGHT - 70, 95, 55)
-restart_button = pygame.Rect(WIDTH // 2 - 90, HEIGHT // 2 + 35, 180, 55)
-fullscreen_button = pygame.Rect(WIDTH - 190, 10, 170, 42)
+left_button = pygame.Rect(20, HEIGHT - 75, 90, 60)
+right_button = pygame.Rect(125, HEIGHT - 75, 90, 60)
+fire_button = pygame.Rect(WIDTH - 125, HEIGHT - 75, 105, 60)
+restart_button = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 30, 200, 60)
 
 touches = {}
 last_mobile_shot = 0
@@ -166,18 +194,6 @@ rapid_shoot_timer=0
 # ==========================================
 
 running = True
-
-def demander_plein_ecran():
-    try:
-        if hasattr(platform, "window"):
-            document = platform.window.document
-            if hasattr(document.documentElement, "requestFullscreen"):
-                document.documentElement.requestFullscreen()
-            elif hasattr(document.documentElement, "webkitRequestFullscreen"):
-                document.documentElement.webkitRequestFullscreen()
-    except Exception:
-        pass
-
 
 async def main():
     global running, game_over, score, lives, shields, level, enemy_speed
@@ -360,9 +376,6 @@ async def main():
             # COMMANDES TACTILES / SOURIS
             # --------------------------------------
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1 and fullscreen_button.collidepoint(event.pos):
-                    demander_plein_ecran()
-
                 if event.button == 1 and fire_button.collidepoint(event.pos):
                     now = pygame.time.get_ticks()
                     if now - last_mobile_shot > 120:
@@ -399,9 +412,6 @@ async def main():
             if event.type == pygame.FINGERDOWN:
                 finger_pos = (int(event.x * WIDTH), int(event.y * HEIGHT))
                 touches[event.finger_id] = finger_pos
-
-                if fullscreen_button.collidepoint(finger_pos):
-                    demander_plein_ecran()
 
                 if fire_button.collidepoint(finger_pos):
                     now = pygame.time.get_ticks()
@@ -803,21 +813,6 @@ async def main():
                     bonus["rect"].center,
                     15
                 )
-        # ==========================================
-        # BOUTON PLEIN ECRAN
-        # ==========================================
-        pygame.draw.rect(screen, (25, 60, 90), fullscreen_button, border_radius=10)
-        pygame.draw.rect(screen, WHITE, fullscreen_button, 2, border_radius=10)
-
-        fullscreen_text = button_font.render("PLEIN ECRAN", True, WHITE)
-        screen.blit(
-            fullscreen_text,
-            (
-                fullscreen_button.centerx - fullscreen_text.get_width() // 2,
-                fullscreen_button.centery - fullscreen_text.get_height() // 2
-            )
-        )
-
         # ==========================================
         # AFFICHAGE DES BOUTONS TACTILES
         # ==========================================
